@@ -1,8 +1,13 @@
-# Python3 program to perform basic timSort
+import numba
+import numpy
+import stata
+import speed
+
 MIN_MERGE = 32
 
 
-def calcMinRun(n):
+@numba.njit(parallel=False)
+def calc_min_run(n):
     """Returns the minimum length of a
     run from 23 - 64 so that
     the len(array)/minrun is less than or
@@ -19,17 +24,31 @@ def calcMinRun(n):
 
 
 # This function sorts array from left index to
-# to right index which is of size atmost RUN
-def insertionSort(arr, left, right):
+# to right index which is of size almost RUN
+@numba.njit(parallel=False)
+def insertion_sort(arr, left, right):
+    sw = 0
+    cmp = 0
     for i in range(left + 1, right + 1):
         j = i
         while j > left and arr[j] < arr[j - 1]:
             arr[j], arr[j - 1] = arr[j - 1], arr[j]
             j -= 1
 
+            sw += 1
+            cmp += 1
+        else:
+            if j > left:
+                cmp += 1
+
+    return sw, cmp
+
 
 # Merge function merges the sorted runs
+@numba.njit(parallel=False)
 def merge(arr, l, m, r):
+    sw = 0
+    cmp = 0
     # original array is broken in two parts
     # left and right array
     len1, len2 = m - l + 1, r - m
@@ -44,6 +63,8 @@ def merge(arr, l, m, r):
     # after comparing, we merge those two array
     # in larger sub array
     while i < len1 and j < len2:
+        sw += 1
+        cmp += 1
         if left[i] <= right[j]:
             arr[k] = left[i]
             i += 1
@@ -66,21 +87,30 @@ def merge(arr, l, m, r):
         k += 1
         j += 1
 
+    return sw, cmp
+
 
 # Iterative Timsort function to sort the
 # array[0...n-1] (similar to merge sort)
+@speed.faster
+@stata.get_stat
+@numba.njit(parallel=False)
 def sort(arr):
+    sw = 0
+    cmp = 0
     n = len(arr)
-    minRun = calcMinRun(n)
+    min_run = calc_min_run(n)
 
     # Sort individual subarrays of size RUN
-    for start in range(0, n, minRun):
-        end = min(start + minRun - 1, n - 1)
-        insertionSort(arr, start, end)
+    for start in range(0, n, min_run):
+        end = min(start + min_run - 1, n - 1)
+        a = insertion_sort(arr, start, end)
+        sw += a[0]
+        cmp += a[1]
 
     # Start merging from size RUN (or 32). It will merge
     # to form size 64, then 128, 256 and so on ....
-    size = minRun
+    size = min_run
     while size < n:
 
         # Pick starting point of left sub array. We
@@ -97,9 +127,13 @@ def sort(arr):
             # Merge sub array arr[left.....mid] &
             # arr[mid+1....right]
             if mid < right:
-                merge(arr, left, mid, right)
+                a = merge(arr, left, mid, right)
+                sw += a[0]
+                cmp += a[1]
 
         size = 2 * size
+
+    return sw, cmp
 
 
 if __name__ == "__main__":
@@ -108,12 +142,16 @@ if __name__ == "__main__":
     import time
 
     random.seed(123)
-    ar = [random.randint(1, int(1e6)) for i in range(1, int(1e6))]
+    ar = [random.randint(1, int(1e6)) for i in range(int(1e6))]
+
+    ar = numpy.array(ar)
+
+    print(ar)
 
     print("pass")
-    start = time.time()
-    sort(ar)
-    print(time.time()-start)
-    print(timeit.repeat("sort(ar)", "from __main__ import sort, ar",repeat=1, number=1))
+    start1 = time.time()
+    print(sort(ar))
+    print(time.time() - start1)
+    print(timeit.repeat("sort(ar)", "from __main__ import sort, ar", repeat=1, number=4))
 
     print("end")

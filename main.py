@@ -6,11 +6,11 @@ import timsort
 if __name__ == "__main__":
     ar = [random.randint(1, 1000) for i in range(1000)]
 
-    # ins.sort(ar)
+    ins.sort(ar)
 
-    timsort.sort(ar)
+    # timsort.sort(ar)
 
-    print(ar)
+    # print(ar)
     gui.gui()
 
 
