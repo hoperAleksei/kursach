@@ -1,0 +1,1 @@
+.\venv\Scripts\pyinstaller.exe --onefile --noconsole --add-data="icon.ico;." --icon=icon.ico --path .\venv\ .\main.py

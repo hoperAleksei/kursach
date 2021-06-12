@@ -1,13 +1,23 @@
 import numba
-import numpy
 import stata
 import speed
 
 
 @speed.faster
 @stata.get_stat
-@numba.njit(parallel=False)
-def sort(arr):
+@numba.njit(parallel=False, cache=False)
+def sort(arr: "list like") -> (int, int):
+    """
+    Insertion sort.
+
+    Sorting array.
+
+    Returns swap and compare count.
+
+    :param arr: list
+    :return (sw, cmp): (int, int)
+    """
+
     sw = 0
     cmp = 0
     for i in range(1, len(arr)):
@@ -29,7 +39,6 @@ def sort(arr):
 if __name__ == "__main__":
     import timeit
     import random
-    import stata
 
     # import time
 
@@ -37,20 +46,16 @@ if __name__ == "__main__":
     # def s(): sort
     # random.seed(123)
 
-    ar = [random.randint(1, int(1e6)) for i in range(1, int(1e6))]
-    ar = numpy.array(ar, int)
+    ar = [random.randint(1, int(1e6)) for i in range(1, int(32))]
+    # ar = numpy.array(ar, int)
 
     print("pass")
 
-    # start = time.time()
-
-    print(ar)
+    # print(ar)
     # s(ar)
     print(sort(ar))
 
-    # print(time.time() - start)
-
-    print(ar)
+    # print(ar)
 
     print(timeit.repeat("sort(ar)", "from __main__ import sort, ar", repeat=1, number=1))
 

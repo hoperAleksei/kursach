@@ -3,6 +3,11 @@ import random
 import os.path
 
 
+SQ_TYPE = ("Упорядоченная", "Из едениц", "Случайная", "Частичная", "Обратная")
+SQ_DES = ("ord", "sing", "rnd", "par", "rvs")
+# SQ_DES = ("ordered", "single", "random", "partial", "reverse")
+
+
 class SortFile:
     def __init__(self, seq_type, count, name, sequence):
         self.type = seq_type
@@ -20,15 +25,12 @@ class FileEncoder(json.JSONEncoder):
 
 
 def decode_file(dct):
-    sequence_type = ("Упорядоченная", "Из едениц", "Случайная", "Частичная", "Обратная")
-    sequence_des = ("ordered", "single", "random", "partial", "reverse")
-
     seq_type = ""
 
     if "__file__" in dct:
-        for i in range(len(sequence_des)):
-            if sequence_des[i] == dct["type"]:
-                seq_type = sequence_type[i]
+        for i in range(len(SQ_DES)):
+            if SQ_DES[i] == dct["type"]:
+                seq_type = SQ_TYPE[i]
                 break
 
         return SortFile(seq_type=seq_type, count=dct["count"], name=dct["name"], sequence=dct["sequence"])
@@ -36,26 +38,24 @@ def decode_file(dct):
 
 
 def generate_file(seq_type, count, folder):
-    sequence_type = ("Упорядоченная", "Из едениц", "Случайная", "Частичная", "Обратная")
-    sequence_des = ("ordered", "single", "random", "partial", "reverse")
 
     type_des = ""
     arr = []
 
-    if seq_type == sequence_type[0]:
-        type_des = sequence_des[0]
+    if seq_type == SQ_TYPE[0]:
+        type_des = SQ_DES[0]
         arr = [i for i in range(count)]
-    elif seq_type == sequence_type[1]:
-        type_des = sequence_des[1]
+    elif seq_type == SQ_TYPE[1]:
+        type_des = SQ_DES[1]
         arr = [1] * count
-    elif seq_type == sequence_type[2]:
-        type_des = sequence_des[2]
-        arr = [random.randint(0, count) for i in range(count)]
-    elif seq_type == sequence_type[3]:
-        type_des = sequence_des[3]
+    elif seq_type == SQ_TYPE[2]:
+        type_des = SQ_DES[2]
+        arr = [random.randint(0, count) for _ in range(count)]
+    elif seq_type == SQ_TYPE[3]:
+        type_des = SQ_DES[3]
         arr = [i if i < count / 2 else random.randint(int(count / 2), count) for i in range(count)]
-    elif seq_type == sequence_type[4]:
-        type_des = sequence_des[4]
+    elif seq_type == SQ_TYPE[4]:
+        type_des = SQ_DES[4]
         arr = [i for i in range(count - 1, -1, -1)]
 
     file_name = type_des + "_" + str(count) + ".sort"
@@ -86,6 +86,6 @@ def open_file(filename):
 if __name__ == "__main__":
     generate_file("Упорядоченная", 1010, "./files/")
 
-    ss = open_file("./files/ordered_1010.sort")
+    ss = open_file("./files/ord_1000.sort")
 
     print(repr(ss.type), repr(ss.count), repr(ss.name), repr(ss.sequence))

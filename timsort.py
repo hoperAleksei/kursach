@@ -25,6 +25,7 @@ def calc_min_run(n):
 
 # This function sorts array from left index to
 # to right index which is of size almost RUN
+
 @numba.njit(parallel=False)
 def insertion_sort(arr, left, right):
     sw = 0
@@ -45,6 +46,7 @@ def insertion_sort(arr, left, right):
 
 
 # Merge function merges the sorted runs
+
 @numba.njit(parallel=False)
 def merge(arr, l, m, r):
     sw = 0
@@ -92,10 +94,22 @@ def merge(arr, l, m, r):
 
 # Iterative Timsort function to sort the
 # array[0...n-1] (similar to merge sort)
+
 @speed.faster
 @stata.get_stat
 @numba.njit(parallel=False)
 def sort(arr):
+    """
+        Timsort.
+
+        Sorting array.
+
+        Returns swap and compare count.
+
+        :param arr: list
+        :return (sw, cmp): (int, int)
+        """
+
     sw = 0
     cmp = 0
     n = len(arr)

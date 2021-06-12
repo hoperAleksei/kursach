@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import filedialog
 import generation as gen
 import graph
+import os
+import sys
 
 
 class Select(tk.Frame):
@@ -254,9 +256,8 @@ class RightMenu(tk.Frame):
         if self.fList.is_empty():
             self.master.console.log("Ошибка: Не выбрано файлов для эксперимента.")
         else:
-
-            self.results = graph.exp(self.fList.get_data())
             self.master.console.log("Проведение эксперемента...")
+            self.results = graph.Exp(master=self, data=self.fList.get_data())
 
 
 class Console(tk.Frame):
@@ -265,7 +266,8 @@ class Console(tk.Frame):
         self.master = master
 
         self.header = tk.Label(text="Console log", bg="#CCCCCC", master=self)
-        self.console = tk.Text(master=self, width=113, height=4, relief=tk.RIDGE, borderwidth=5, font=("Courier", 10))
+        self.console = tk.Text(master=self, width=113, height=4, relief=tk.RIDGE,
+                               borderwidth=5, font=("Courier", 10), state=tk.DISABLED)
 
         self.scroll = tk.Scrollbar(command=self.console.yview, master=self)
 
@@ -278,7 +280,9 @@ class Console(tk.Frame):
         self.grid(row=3, columnspan=2, sticky=tk.NSEW, padx=5, pady=5)
 
     def log(self, text):
+        self.console.configure(state=tk.NORMAL)
         self.console.insert(1.0, str(text) + '\n')
+        self.console.configure(state=tk.DISABLED)
 
 
 class Application(tk.Frame):
@@ -307,9 +311,21 @@ class Root(tk.Tk):
         self.geometry("960x600")
         self.title("Experiment")
         self.resizable(False, False)
+
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        ico = os.path.join(base_path, r"icon.ico")
+
+        self.iconbitmap(ico)
+
         self.app = Application(master=self)
 
         self.mainloop()
 
 
-Root()
+if __name__ == "__main__":
+    Root()
